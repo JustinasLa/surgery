@@ -3,9 +3,10 @@ package tfmc.justin.listeners;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import tfmc.justin.managers.SurgeryMenuManager;
@@ -19,10 +20,20 @@ public class PlayerListener implements Listener {
     }
     
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        // Handle player join event
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        // Remove any leftover surgery state so quitting mid-surgery doesn't leak
+        menuManager.cleanup(event.getPlayer());
     }
-    
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        // Block drags entirely while the surgery menu is open; drag events are not
+        // covered by the click handler and could place items into menu slots
+        if (menuManager.isSurgeryMenu(event.getView().getTitle())) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         InventoryView view = event.getView();

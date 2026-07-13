@@ -56,7 +56,7 @@ public class SurgeryMechanicsManager {
     // ==============================================
     // Processes per-move effects (antibiotics countdown, temperature changes, etc.)
     // ==============================================
-    public void processMoveEffects(Player player) {
+    public void processMoveEffects(Player player, int clickedSlot) {
         UUID playerId = player.getUniqueId();
         Inventory menu = player.getOpenInventory().getTopInventory();
         String diagnosis = stateManager.getDiagnosis(playerId);
@@ -78,8 +78,11 @@ public class SurgeryMechanicsManager {
             }
         }
         
-        // Check defibrillator countdown (failure after 2 moves)
-        if (currentStatus.equals("Heart Stopped")) {
+        // Check defibrillator countdown (failure after configured moves)
+        // Skip the decrement when the defibrillator itself was clicked, otherwise
+        // the countdown expires before the shock is applied and the full window
+        // promised by the config is never usable
+        if (currentStatus.equals("Heart Stopped") && clickedSlot != 39) {
             Integer countdown = stateManager.getDefibrillatorCountdown(playerId);
             if (countdown != null) {
                 countdown--;

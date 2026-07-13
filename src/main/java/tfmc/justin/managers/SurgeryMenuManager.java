@@ -37,7 +37,12 @@ public class SurgeryMenuManager {
     public void initialize() {
         plugin.getLogger().info("[Surgery] Loading TLibs API...");
         api = (ItemAPI) TLibs.getApiInstance(APIType.ITEM_API);
-        
+        if (api == null) {
+            plugin.getLogger().severe("[Surgery] TLibs ItemAPI is unavailable - disabling plugin.");
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+
         // Initialize all managers in dependency order
         diagnosisChecker = new DiagnosisChecker(plugin);
         stateManager = new SurgeryStateManager();

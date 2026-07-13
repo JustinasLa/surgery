@@ -98,6 +98,10 @@ public class SurgeryCompletionHandler {
         // Only fail if player still has active surgery data (not cleaned up from success)
         if (stateManager.hasDiagnosis(playerId)) {
             failSurgery(player, uiUpdater.getMessage("failure-gave-up"));
+        } else {
+            // No diagnosis yet (menu closed before ultrasound) - nothing to fail,
+            // but state initialized on menu open must still be released
+            stateManager.cleanup(playerId);
         }
     }
     

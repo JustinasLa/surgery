@@ -113,8 +113,14 @@ public class SurgeryItemHandler {
             stateManager.addClickedSlot(playerId, slot);
             
             // Process per-move effects before updating menu
-            mechanicsManager.processMoveEffects(player);
-            
+            mechanicsManager.processMoveEffects(player, slot);
+
+            // Move effects may have ended the surgery (death timers, fever, bleed-out);
+            // state is cleaned up and the menu is closed, so stop here
+            if (!stateManager.hasPulse(playerId)) {
+                return;
+            }
+
             // Update the menu based on what was clicked
             updateMenu(player, slot);
             

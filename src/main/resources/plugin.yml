@@ -1,8 +1,9 @@
 main: tfmc.justin.surgery
-version: 1.0.0-SNAPSHOT
+version: 1.0.1
 name: surgery
 author: Justin
 api-version: 1.21
+depend: [TLibs]
 
 commands:
   surgery:

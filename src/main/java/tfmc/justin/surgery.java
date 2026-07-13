@@ -24,6 +24,11 @@ public class surgery extends JavaPlugin {
         surgeryMenuManager = new SurgeryMenuManager(this, itemsConfig);
         surgeryMenuManager.initialize();
 
+        // initialize() disables the plugin if the TLibs API could not be loaded
+        if (!isEnabled()) {
+            return;
+        }
+
         PluginManager.getInstance().initialize();
         
         getServer().getPluginManager().registerEvents(new PlayerListener(surgeryMenuManager), this);
