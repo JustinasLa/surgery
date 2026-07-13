@@ -63,8 +63,8 @@ public class SurgeryCompletionHandler {
         executeCompletionCommand(player, true);
     
         stateManager.cleanup(playerId);
-        
-        player.closeInventory();
+
+        closeMenuNextTick(player);
         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
         player.sendMessage(uiUpdater.getMessage("surgery-successful"));
         player.sendMessage(uiUpdater.getMessage("surgery-successful-subtitle"));
@@ -82,13 +82,21 @@ public class SurgeryCompletionHandler {
         executeCompletionCommand(player, false);
         
         stateManager.cleanup(playerId);
-        
-        player.closeInventory();
+
+        closeMenuNextTick(player);
         player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, 1.0f, 0.8f);
         player.sendMessage(uiUpdater.getMessage("surgery-failed"));
         player.sendMessage(message);
     }
     
+    // ==============================================
+    // Closes the menu on the next tick; calling closeInventory directly inside
+    // an InventoryClickEvent handler is undefined behavior per the Bukkit docs
+    // ==============================================
+    private void closeMenuNextTick(Player player) {
+        Bukkit.getScheduler().runTask(plugin, (Runnable) player::closeInventory);
+    }
+
     // ==============================================
     // Handles player giving up on surgery (only if they didn't complete it successfully)
     // ==============================================

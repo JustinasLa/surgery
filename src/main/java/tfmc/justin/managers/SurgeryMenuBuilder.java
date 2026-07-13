@@ -1,7 +1,6 @@
 package tfmc.justin.managers;
 
 import me.Plugins.TLibs.Objects.API.ItemAPI;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -35,7 +34,7 @@ public class SurgeryMenuBuilder {
     // Builds and opens the surgery menu for a player
     // ==============================================
     public void buildAndOpenMenu(Player player) {
-        Inventory menu = Bukkit.createInventory(null, 54, "Surgery Menu");
+        Inventory menu = new SurgeryMenuHolder().getInventory();
         
         // Map specific items to specific slots
         int[][] slotMapping = {

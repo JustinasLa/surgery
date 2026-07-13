@@ -278,6 +278,10 @@ public class SurgeryItemHandler {
             if (diagnosis != null) {
                 mechanicsManager.handleBoneReveal(player, menu, playerId, diagnosis, incisions);
             }
+
+            // Always refresh dynamic tools; the clamp depends on incision count and
+            // bleeding, which can both be true before a diagnosis exists
+            mechanicsManager.updateDynamicTools(player, menu, playerId);
             
             // 50% chance for pulse to decrease when making incision
             if (ThreadLocalRandom.current().nextDouble() < plugin.getConfig().getDouble("pulse.scalpel-decrease-chance", 0.50)) {

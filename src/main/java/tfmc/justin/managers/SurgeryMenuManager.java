@@ -68,10 +68,10 @@ public class SurgeryMenuManager {
     }
     
     // ==============================================
-    // Checks if an inventory title matches the surgery menu
+    // Checks if an inventory is the surgery menu (by holder, not title)
     // ==============================================
-    public boolean isSurgeryMenu(String title) {
-        return title.equals("Surgery Menu");
+    public boolean isSurgeryMenu(org.bukkit.inventory.Inventory inventory) {
+        return inventory != null && inventory.getHolder() instanceof SurgeryMenuHolder;
     }
     
     // ==============================================

@@ -241,17 +241,17 @@ public class SurgeryMechanicsManager {
             case 0: // Temperature spike
                 double tempSpikeMax = plugin.getConfig().getDouble("diagnosis-mechanics.arcane-infection.temp-spike-max", 4.0);
                 double maxTemp = plugin.getConfig().getDouble("temperature.instant-death-threshold", 110.0);
-                temp = stateManager.getTemperature(playerId) + ThreadLocalRandom.current().nextDouble() * tempSpikeMax;
-                stateManager.setTemperature(playerId, Math.min(temp, maxTemp));
+                temp = Math.min(stateManager.getTemperature(playerId) + ThreadLocalRandom.current().nextDouble() * tempSpikeMax, maxTemp);
+                stateManager.setTemperature(playerId, temp);
                 uiUpdater.updateTemperatureBlock(menu, playerId, temp);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("chaos-temp-spike"));
                 break;
-                
+
             case 1: // Temperature drop
                 double tempDropMax = plugin.getConfig().getDouble("diagnosis-mechanics.arcane-infection.temp-drop-max", 2.0);
                 double normalTemp = plugin.getConfig().getDouble("temperature.normal", 98.6);
-                temp = stateManager.getTemperature(playerId) - ThreadLocalRandom.current().nextDouble() * tempDropMax;
-                stateManager.setTemperature(playerId, Math.max(temp, normalTemp));
+                temp = Math.max(stateManager.getTemperature(playerId) - ThreadLocalRandom.current().nextDouble() * tempDropMax, normalTemp);
+                stateManager.setTemperature(playerId, temp);
                 uiUpdater.updateTemperatureBlock(menu, playerId, temp);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("chaos-temp-drop"));
                 break;
@@ -325,8 +325,10 @@ public class SurgeryMechanicsManager {
     // ==============================================
     public void handleBoneReveal(Player player, Inventory menu, UUID playerId, String diagnosis, int incisions) {
         if (diagnosisChecker.hasBones(diagnosis)) {
-            Integer requiredIncisions = plugin.getConfig().getInt("required-incisions." + diagnosis, 0);
-            if (incisions == requiredIncisions) {
+            // >= so overshooting the required count still reveals; re-running is
+            // idempotent because revealed counts track the actual bone counts
+            int required = requiredIncisions.getOrDefault(diagnosis, 0);
+            if (incisions >= required) {
                 int totalBrokenBones = stateManager.getBrokenBones(playerId);
                 int totalShatteredBones = stateManager.getShatteredBones(playerId);
                 stateManager.setRevealedBrokenBones(playerId, totalBrokenBones);
