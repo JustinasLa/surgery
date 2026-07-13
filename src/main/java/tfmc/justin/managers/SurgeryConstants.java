@@ -15,22 +15,6 @@ public class SurgeryConstants {
         "Coming to"      // ORANGE_CONCRETE
     };
     
-    // List of possible operation site statuses (with corresponding colors)
-    public static final String[] OPERATION_SITE_STATUSES = {
-        "Clean",         // LIME_CONCRETE
-        "Not sanitized", // YELLOW_CONCRETE
-        "Unclean",       // ORANGE_CONCRETE
-        "Unsanitary"     // RED_CONCRETE
-    };
-    
-    // List of possible pulse statuses (with corresponding colors)
-    public static final String[] PULSE_STATUSES = {
-        "Strong",        // LIME_CONCRETE
-        "Steady",        // YELLOW_CONCRETE
-        "Weak",          // ORANGE_CONCRETE
-        "Extremely Weak" // RED_CONCRETE
-    };
-    
     // ==============================================
     // Gets the material color for pulse status
     // ==============================================

@@ -1,4 +1,4 @@
-main: tfmc.justin.surgery
+main: tfmc.justin.SurgeryPlugin
 version: 1.0.1
 name: surgery
 author: Justin

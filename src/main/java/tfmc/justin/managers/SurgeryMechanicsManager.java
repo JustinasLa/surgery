@@ -8,8 +8,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 // ==============================================
 // Handles diagnosis-specific mechanics and per-move effects
@@ -23,8 +23,7 @@ public class SurgeryMechanicsManager {
     private final SurgeryCompletionHandler completionHandler;
     private final DiagnosisChecker diagnosisChecker;
     private final SurgeryItemsConfig itemsConfig;
-    private final Random random;
-    
+
     // Map diagnoses to required incision counts
     private final Map<String, Integer> requiredIncisions = new HashMap<>();
     
@@ -38,7 +37,6 @@ public class SurgeryMechanicsManager {
         this.completionHandler = completionHandler;
         this.diagnosisChecker = diagnosisChecker;
         this.itemsConfig = itemsConfig;
-        this.random = new Random();
     }
     
     // ==============================================
@@ -118,7 +116,7 @@ public class SurgeryMechanicsManager {
         
         // Degrade pulse if bleeding
         double pulseDegradationChance = plugin.getConfig().getDouble("pulse.degradation-chance-bleeding", 0.30);
-        if (stateManager.isBleeding(playerId) && random.nextDouble() < pulseDegradationChance) {
+        if (stateManager.isBleeding(playerId) && ThreadLocalRandom.current().nextDouble() < pulseDegradationChance) {
             String currentPulse = stateManager.getPulse(playerId);
             if (currentPulse.equals("Extremely Weak")) {
                 completionHandler.failSurgery(player, uiUpdater.getMessage("failure-bled-out"));
@@ -189,7 +187,7 @@ public class SurgeryMechanicsManager {
                 
             case "Fatty Liver":
                 double fattyLiverChance = plugin.getConfig().getDouble("diagnosis-mechanics.fatty-liver.heart-stop-chance", 0.20);
-                if (stateManager.getStatus(playerId).equals("Unconscious") && random.nextDouble() < fattyLiverChance) {
+                if (stateManager.getStatus(playerId).equals("Unconscious") && ThreadLocalRandom.current().nextDouble() < fattyLiverChance) {
                     stateManager.setStatus(playerId, "Heart Stopped");
                     uiUpdater.updateStatusBlock(menu, playerId, "Heart Stopped");
                     uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("fatty-liver-heart-stop"));
@@ -201,7 +199,7 @@ public class SurgeryMechanicsManager {
                 
             case "Broken Heart":
                 double brokenHeartChance = plugin.getConfig().getDouble("diagnosis-mechanics.broken-heart.heart-stop-chance", 0.35);
-                if (stateManager.getStatus(playerId).equals("Unconscious") && random.nextDouble() < brokenHeartChance) {
+                if (stateManager.getStatus(playerId).equals("Unconscious") && ThreadLocalRandom.current().nextDouble() < brokenHeartChance) {
                     stateManager.setStatus(playerId, "Heart Stopped");
                     uiUpdater.updateStatusBlock(menu, playerId, "Heart Stopped");
                     uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("broken-heart-stop"));
@@ -213,14 +211,14 @@ public class SurgeryMechanicsManager {
                 
             case "Arcane Infection":
                 double arcaneChance = plugin.getConfig().getDouble("diagnosis-mechanics.arcane-infection.chaos-chance", 0.25);
-                if (random.nextDouble() < arcaneChance) {
+                if (ThreadLocalRandom.current().nextDouble() < arcaneChance) {
                     handleArcaneInfectionChaos(player, menu, playerId);
                 }
                 break;
                 
             case "Lupus":
                 double lupusChance = plugin.getConfig().getDouble("diagnosis-mechanics.lupus.howl-chance", 0.15);
-                if (random.nextDouble() < lupusChance) {
+                if (ThreadLocalRandom.current().nextDouble() < lupusChance) {
                     int currentIncisions = stateManager.getIncisions(playerId);
                     stateManager.setIncisions(playerId, currentIncisions + 1);
                     uiUpdater.updateIncisionBlock(menu, playerId, currentIncisions + 1);
@@ -236,14 +234,14 @@ public class SurgeryMechanicsManager {
     // Handles Arcane Infection chaos effects
     // ==============================================
     private void handleArcaneInfectionChaos(Player player, Inventory menu, UUID playerId) {
-        int chaosEffect = random.nextInt(4);
+        int chaosEffect = ThreadLocalRandom.current().nextInt(4);
         double temp;
         
         switch (chaosEffect) {
             case 0: // Temperature spike
                 double tempSpikeMax = plugin.getConfig().getDouble("diagnosis-mechanics.arcane-infection.temp-spike-max", 4.0);
                 double maxTemp = plugin.getConfig().getDouble("temperature.instant-death-threshold", 110.0);
-                temp = stateManager.getTemperature(playerId) + random.nextDouble() * tempSpikeMax;
+                temp = stateManager.getTemperature(playerId) + ThreadLocalRandom.current().nextDouble() * tempSpikeMax;
                 stateManager.setTemperature(playerId, Math.min(temp, maxTemp));
                 uiUpdater.updateTemperatureBlock(menu, playerId, temp);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("chaos-temp-spike"));
@@ -252,7 +250,7 @@ public class SurgeryMechanicsManager {
             case 1: // Temperature drop
                 double tempDropMax = plugin.getConfig().getDouble("diagnosis-mechanics.arcane-infection.temp-drop-max", 2.0);
                 double normalTemp = plugin.getConfig().getDouble("temperature.normal", 98.6);
-                temp = stateManager.getTemperature(playerId) - random.nextDouble() * tempDropMax;
+                temp = stateManager.getTemperature(playerId) - ThreadLocalRandom.current().nextDouble() * tempDropMax;
                 stateManager.setTemperature(playerId, Math.max(temp, normalTemp));
                 uiUpdater.updateTemperatureBlock(menu, playerId, temp);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("chaos-temp-drop"));
@@ -268,7 +266,7 @@ public class SurgeryMechanicsManager {
                 break;
                 
             case 3: // Random status change
-                String newStatus = SurgeryConstants.PATIENT_STATUSES[random.nextInt(SurgeryConstants.PATIENT_STATUSES.length)];
+                String newStatus = SurgeryConstants.PATIENT_STATUSES[ThreadLocalRandom.current().nextInt(SurgeryConstants.PATIENT_STATUSES.length)];
                 stateManager.setStatus(playerId, newStatus);
                 uiUpdater.updateStatusBlock(menu, playerId, newStatus);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("chaos-status-change"));
@@ -351,12 +349,12 @@ public class SurgeryMechanicsManager {
         
         double revealChance = plugin.getConfig().getDouble("bones.random-reveal-chance", 0.25);
         
-        if (revealedBroken < totalBroken && random.nextDouble() < revealChance) {
+        if (revealedBroken < totalBroken && ThreadLocalRandom.current().nextDouble() < revealChance) {
             stateManager.setRevealedBrokenBones(playerId, revealedBroken + 1);
             uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("discovered-broken-bone"));
         }
         
-        if (revealedShattered < totalShattered && random.nextDouble() < revealChance) {
+        if (revealedShattered < totalShattered && ThreadLocalRandom.current().nextDouble() < revealChance) {
             stateManager.setRevealedShatteredBones(playerId, revealedShattered + 1);
             uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("discovered-shattered-bone"));
         }

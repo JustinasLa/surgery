@@ -162,6 +162,13 @@ public class SurgeryUIUpdater {
     public String getMessage(String path) {
         return ChatColor.translateAlternateColorCodes('&', messages.getString(path, ""));
     }
+
+    // ==============================================
+    // Gets a message with a fallback default, translating color codes
+    // ==============================================
+    public String getMessage(String path, String def) {
+        return ChatColor.translateAlternateColorCodes('&', messages.getString(path, def));
+    }
     
     // ==============================================
     // Gets a list of messages from messages.yml

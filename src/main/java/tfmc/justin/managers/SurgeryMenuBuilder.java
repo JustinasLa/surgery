@@ -9,8 +9,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 // ==============================================
 // Builds and initializes the surgery menu
@@ -22,15 +22,13 @@ public class SurgeryMenuBuilder {
     private final SurgeryStateManager stateManager;
     private final SurgeryUIUpdater uiUpdater;
     private final SurgeryItemsConfig itemsConfig;
-    private final Random random;
-    
+
     public SurgeryMenuBuilder(JavaPlugin plugin, ItemAPI api, SurgeryStateManager stateManager, SurgeryUIUpdater uiUpdater, SurgeryItemsConfig itemsConfig) {
         this.plugin = plugin;
         this.api = api;
         this.stateManager = stateManager;
         this.uiUpdater = uiUpdater;
         this.itemsConfig = itemsConfig;
-        this.random = new Random();
     }
     
     // ==============================================
@@ -119,7 +117,7 @@ public class SurgeryMenuBuilder {
         // ==============================================
         // Randomize if patient has rising temperature (50% chance)
         // ==============================================
-        boolean hasRisingTemp = random.nextBoolean();
+        boolean hasRisingTemp = ThreadLocalRandom.current().nextBoolean();
         stateManager.setHasRisingTemp(playerId, hasRisingTemp);
         
         // ==============================================
@@ -130,7 +128,7 @@ public class SurgeryMenuBuilder {
         if (hasRisingTemp) {
             double minTemp = plugin.getConfig().getDouble("temperature.rising-temp-min", 98.6);
             double maxTemp = plugin.getConfig().getDouble("temperature.rising-temp-max", 104.0);
-            temperature = minTemp + (random.nextDouble() * (maxTemp - minTemp));
+            temperature = minTemp + (ThreadLocalRandom.current().nextDouble() * (maxTemp - minTemp));
         } else {
             temperature = plugin.getConfig().getDouble("temperature.normal", 98.6);
         }
@@ -170,12 +168,10 @@ public class SurgeryMenuBuilder {
         // ==============================================
         stateManager.setBleeding(playerId, false);
         stateManager.setCured(playerId, false);
-        stateManager.setAntibioticsCounter(playerId, 0);
         stateManager.setAntisepticProtection(playerId, false);
         stateManager.setSpongeEffect(playerId, false);
         stateManager.setMoveCount(playerId, 0);
         stateManager.setMovesSinceLastSponge(playerId, 0);
-        stateManager.setWoundsExamined(playerId, false);
         stateManager.setUnconsciousTimer(playerId, 0);
 
         // ==============================================

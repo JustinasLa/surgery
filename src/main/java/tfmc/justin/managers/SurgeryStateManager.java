@@ -1,133 +1,116 @@
 package tfmc.justin.managers;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 // ==============================================
 // Manages all player state for ongoing surgeries
+// One SurgerySession per surgeon; cleanup removes the whole session at once
 // ==============================================
 public class SurgeryStateManager {
-    
-    private final Map<UUID, Set<Integer>> playerClickedSlots = new HashMap<>();
-    private final Map<UUID, String> playerDiagnosis = new HashMap<>();
-    private final Map<UUID, String> playerPulse = new HashMap<>();
-    private final Map<UUID, String> playerStatus = new HashMap<>();
-    private final Map<UUID, Double> playerTemperature = new HashMap<>();
-    private final Map<UUID, String> playerOperationSite = new HashMap<>();
-    private final Map<UUID, Integer> playerIncisions = new HashMap<>();
-    private final Map<UUID, String> playerSkillFail = new HashMap<>();
-    private final Map<UUID, Boolean> playerBleeding = new HashMap<>();
-    private final Map<UUID, Integer> playerBrokenBones = new HashMap<>();
-    private final Map<UUID, Integer> playerShatteredBones = new HashMap<>();
-    private final Map<UUID, Integer> playerRevealedBrokenBones = new HashMap<>();
-    private final Map<UUID, Integer> playerRevealedShatteredBones = new HashMap<>();
-    private final Map<UUID, Integer> playerDefibrillatorCountdown = new HashMap<>();
-    private final Map<UUID, Boolean> playerCured = new HashMap<>();
-    private final Map<UUID, Integer> playerAntibioticsCounter = new HashMap<>();
-    private final Map<UUID, Boolean> playerAntisepticProtection = new HashMap<>();
-    private final Map<UUID, Boolean> playerSpongeEffect = new HashMap<>();
-    private final Map<UUID, Integer> playerMoveCount = new HashMap<>();
-    private final Map<UUID, Integer> playerMovesSinceLastSponge = new HashMap<>();
-    private final Map<UUID, Boolean> playerWoundsExamined = new HashMap<>();
-    private final Map<UUID, Integer> playerUnconsciousTimer = new HashMap<>();
-    private final Map<UUID, Boolean> playerHasRisingTemp = new HashMap<>();
-    private final Map<UUID, Integer> playerExtremelyWeakCounter = new HashMap<>();
-    private final Map<UUID, Integer> playerRedTempCounter = new HashMap<>();
-    private final Map<UUID, String> playerPatientName = new HashMap<>();
-    
+
+    // ==============================================
+    // All per-surgery state in one object
+    // Boxed types so getters can fall back to defaults when unset
+    // ==============================================
+    private static class SurgerySession {
+        String patientName;
+        String diagnosis;
+        String pulse;
+        String status;
+        Double temperature;
+        String operationSite;
+        Integer incisions;
+        String skillFail;
+        Boolean bleeding;
+        Integer brokenBones;
+        Integer shatteredBones;
+        Integer revealedBrokenBones;
+        Integer revealedShatteredBones;
+        Integer defibrillatorCountdown;
+        Boolean cured;
+        Boolean antisepticProtection;
+        Boolean spongeEffect;
+        Integer moveCount;
+        Integer movesSinceLastSponge;
+        Integer unconsciousTimer;
+        Boolean hasRisingTemp;
+        Integer extremelyWeakCounter;
+        Integer redTempCounter;
+    }
+
+    private final Map<UUID, SurgerySession> sessions = new HashMap<>();
+
+    private SurgerySession session(UUID playerId) {
+        return sessions.computeIfAbsent(playerId, k -> new SurgerySession());
+    }
+
+    private SurgerySession get(UUID playerId) {
+        return sessions.get(playerId);
+    }
+
     // ==============================================
     // Getters with default values
     // ==============================================
-    public Set<Integer> getClickedSlots(UUID playerId) { return playerClickedSlots.getOrDefault(playerId, new HashSet<>()); }
-    public String getDiagnosis(UUID playerId) { return playerDiagnosis.get(playerId); }
-    public String getPulse(UUID playerId) { return playerPulse.getOrDefault(playerId, "Strong"); }
-    public String getStatus(UUID playerId) { return playerStatus.getOrDefault(playerId, "Awake"); }
-    public double getTemperature(UUID playerId) { return playerTemperature.getOrDefault(playerId, 98.6); }
-    public String getOperationSite(UUID playerId) { return playerOperationSite.getOrDefault(playerId, "Not sanitized"); }
-    public int getIncisions(UUID playerId) { return playerIncisions.getOrDefault(playerId, 0); }
-    public String getSkillFail(UUID playerId) { return playerSkillFail.getOrDefault(playerId, ""); }
-    public boolean isBleeding(UUID playerId) { return playerBleeding.getOrDefault(playerId, false); }
-    public int getBrokenBones(UUID playerId) { return playerBrokenBones.getOrDefault(playerId, 0); }
-    public int getShatteredBones(UUID playerId) { return playerShatteredBones.getOrDefault(playerId, 0); }
-    public int getRevealedBrokenBones(UUID playerId) { return playerRevealedBrokenBones.getOrDefault(playerId, 0); }
-    public int getRevealedShatteredBones(UUID playerId) { return playerRevealedShatteredBones.getOrDefault(playerId, 0); }
-    public Integer getDefibrillatorCountdown(UUID playerId) { return playerDefibrillatorCountdown.get(playerId); }
-    public boolean isCured(UUID playerId) { return playerCured.getOrDefault(playerId, false); }
-    public Integer getAntibioticsCounter(UUID playerId) { return playerAntibioticsCounter.get(playerId); }
-    public boolean hasAntisepticProtection(UUID playerId) { return playerAntisepticProtection.getOrDefault(playerId, false); }
-    public boolean hasSpongeEffect(UUID playerId) { return playerSpongeEffect.getOrDefault(playerId, false); }
-    public int getMoveCount(UUID playerId) { return playerMoveCount.getOrDefault(playerId, 0); }
-    public int getMovesSinceLastSponge(UUID playerId) { return playerMovesSinceLastSponge.getOrDefault(playerId, 0); }
-    public boolean hasWoundsExamined(UUID playerId) { return playerWoundsExamined.getOrDefault(playerId, false); }
-    public Integer getUnconsciousTimer(UUID playerId) { return playerUnconsciousTimer.get(playerId); }
-    public boolean hasRisingTemp(UUID playerId) { return playerHasRisingTemp.getOrDefault(playerId, false); }
-    public int getExtremelyWeakCounter(UUID playerId) { return playerExtremelyWeakCounter.getOrDefault(playerId, 0); }
-    public int getRedTempCounter(UUID playerId) { return playerRedTempCounter.getOrDefault(playerId, 0); }
-    public String getPatientName(UUID playerId) { return playerPatientName.getOrDefault(playerId, "Unknown"); }
-    public boolean hasDiagnosis(UUID playerId) { return playerDiagnosis.containsKey(playerId); }
-    public boolean hasPulse(UUID playerId) { return playerPulse.containsKey(playerId); }
-    
+    public String getDiagnosis(UUID playerId) { SurgerySession s = get(playerId); return s == null ? null : s.diagnosis; }
+    public String getPulse(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.pulse == null ? "Strong" : s.pulse; }
+    public String getStatus(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.status == null ? "Awake" : s.status; }
+    public double getTemperature(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.temperature == null ? 98.6 : s.temperature; }
+    public String getOperationSite(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.operationSite == null ? "Not sanitized" : s.operationSite; }
+    public int getIncisions(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.incisions == null ? 0 : s.incisions; }
+    public String getSkillFail(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.skillFail == null ? "" : s.skillFail; }
+    public boolean isBleeding(UUID playerId) { SurgerySession s = get(playerId); return s != null && Boolean.TRUE.equals(s.bleeding); }
+    public int getBrokenBones(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.brokenBones == null ? 0 : s.brokenBones; }
+    public int getShatteredBones(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.shatteredBones == null ? 0 : s.shatteredBones; }
+    public int getRevealedBrokenBones(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.revealedBrokenBones == null ? 0 : s.revealedBrokenBones; }
+    public int getRevealedShatteredBones(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.revealedShatteredBones == null ? 0 : s.revealedShatteredBones; }
+    public Integer getDefibrillatorCountdown(UUID playerId) { SurgerySession s = get(playerId); return s == null ? null : s.defibrillatorCountdown; }
+    public boolean isCured(UUID playerId) { SurgerySession s = get(playerId); return s != null && Boolean.TRUE.equals(s.cured); }
+    public boolean hasAntisepticProtection(UUID playerId) { SurgerySession s = get(playerId); return s != null && Boolean.TRUE.equals(s.antisepticProtection); }
+    public boolean hasSpongeEffect(UUID playerId) { SurgerySession s = get(playerId); return s != null && Boolean.TRUE.equals(s.spongeEffect); }
+    public int getMoveCount(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.moveCount == null ? 0 : s.moveCount; }
+    public int getMovesSinceLastSponge(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.movesSinceLastSponge == null ? 0 : s.movesSinceLastSponge; }
+    public Integer getUnconsciousTimer(UUID playerId) { SurgerySession s = get(playerId); return s == null ? null : s.unconsciousTimer; }
+    public boolean hasRisingTemp(UUID playerId) { SurgerySession s = get(playerId); return s != null && Boolean.TRUE.equals(s.hasRisingTemp); }
+    public int getExtremelyWeakCounter(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.extremelyWeakCounter == null ? 0 : s.extremelyWeakCounter; }
+    public int getRedTempCounter(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.redTempCounter == null ? 0 : s.redTempCounter; }
+    public String getPatientName(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.patientName == null ? "Unknown" : s.patientName; }
+    public boolean hasDiagnosis(UUID playerId) { SurgerySession s = get(playerId); return s != null && s.diagnosis != null; }
+    public boolean hasPulse(UUID playerId) { SurgerySession s = get(playerId); return s != null && s.pulse != null; }
+
     // ==============================================
     // Setters
     // ==============================================
-    public void addClickedSlot(UUID playerId, int slot) { playerClickedSlots.computeIfAbsent(playerId, k -> new HashSet<>()).add(slot); }
-    public void setDiagnosis(UUID playerId, String diagnosis) { playerDiagnosis.put(playerId, diagnosis); }
-    public void setPulse(UUID playerId, String pulse) { playerPulse.put(playerId, pulse); }
-    public void setStatus(UUID playerId, String status) { playerStatus.put(playerId, status); }
-    public void setTemperature(UUID playerId, double temp) { playerTemperature.put(playerId, temp); }
-    public void setOperationSite(UUID playerId, String site) { playerOperationSite.put(playerId, site); }
-    public void setIncisions(UUID playerId, int incisions) { playerIncisions.put(playerId, incisions); }
-    public void setSkillFail(UUID playerId, String message) { playerSkillFail.put(playerId, message); }
-    public void setBleeding(UUID playerId, boolean bleeding) { playerBleeding.put(playerId, bleeding); }
-    public void setBrokenBones(UUID playerId, int count) { playerBrokenBones.put(playerId, count); }
-    public void setShatteredBones(UUID playerId, int count) { playerShatteredBones.put(playerId, count); }
-    public void setRevealedBrokenBones(UUID playerId, int count) { playerRevealedBrokenBones.put(playerId, count); }
-    public void setRevealedShatteredBones(UUID playerId, int count) { playerRevealedShatteredBones.put(playerId, count); }
-    public void setDefibrillatorCountdown(UUID playerId, int countdown) { playerDefibrillatorCountdown.put(playerId, countdown); }
-    public void setCured(UUID playerId, boolean cured) { playerCured.put(playerId, cured); }
-    public void setAntibioticsCounter(UUID playerId, int count) { playerAntibioticsCounter.put(playerId, count); }
-    public void setAntisepticProtection(UUID playerId, boolean protected_) { playerAntisepticProtection.put(playerId, protected_); }
-    public void setSpongeEffect(UUID playerId, boolean effect) { playerSpongeEffect.put(playerId, effect); }
-    public void setMoveCount(UUID playerId, int count) { playerMoveCount.put(playerId, count); }
-    public void setMovesSinceLastSponge(UUID playerId, int count) { playerMovesSinceLastSponge.put(playerId, count); }
-    public void setWoundsExamined(UUID playerId, boolean examined) { playerWoundsExamined.put(playerId, examined); }
-    public void setUnconsciousTimer(UUID playerId, int timer) { playerUnconsciousTimer.put(playerId, timer); }
-    public void setHasRisingTemp(UUID playerId, boolean risingTemp) { playerHasRisingTemp.put(playerId, risingTemp); }
-    public void setExtremelyWeakCounter(UUID playerId, int count) { playerExtremelyWeakCounter.put(playerId, count); }
-    public void setRedTempCounter(UUID playerId, int count) { playerRedTempCounter.put(playerId, count); }
-    public void setPatientName(UUID playerId, String name) { playerPatientName.put(playerId, name); }
-    public void removeDefibrillatorCountdown(UUID playerId) { playerDefibrillatorCountdown.remove(playerId); }
-    public void removeAntibioticsCounter(UUID playerId) { playerAntibioticsCounter.remove(playerId); }
-    public void removeUnconsciousTimer(UUID playerId) { playerUnconsciousTimer.remove(playerId); }
-    
+    public void setDiagnosis(UUID playerId, String diagnosis) { session(playerId).diagnosis = diagnosis; }
+    public void setPulse(UUID playerId, String pulse) { session(playerId).pulse = pulse; }
+    public void setStatus(UUID playerId, String status) { session(playerId).status = status; }
+    public void setTemperature(UUID playerId, double temp) { session(playerId).temperature = temp; }
+    public void setOperationSite(UUID playerId, String site) { session(playerId).operationSite = site; }
+    public void setIncisions(UUID playerId, int incisions) { session(playerId).incisions = incisions; }
+    public void setSkillFail(UUID playerId, String message) { session(playerId).skillFail = message; }
+    public void setBleeding(UUID playerId, boolean bleeding) { session(playerId).bleeding = bleeding; }
+    public void setBrokenBones(UUID playerId, int count) { session(playerId).brokenBones = count; }
+    public void setShatteredBones(UUID playerId, int count) { session(playerId).shatteredBones = count; }
+    public void setRevealedBrokenBones(UUID playerId, int count) { session(playerId).revealedBrokenBones = count; }
+    public void setRevealedShatteredBones(UUID playerId, int count) { session(playerId).revealedShatteredBones = count; }
+    public void setDefibrillatorCountdown(UUID playerId, int countdown) { session(playerId).defibrillatorCountdown = countdown; }
+    public void setCured(UUID playerId, boolean cured) { session(playerId).cured = cured; }
+    public void setAntisepticProtection(UUID playerId, boolean protected_) { session(playerId).antisepticProtection = protected_; }
+    public void setSpongeEffect(UUID playerId, boolean effect) { session(playerId).spongeEffect = effect; }
+    public void setMoveCount(UUID playerId, int count) { session(playerId).moveCount = count; }
+    public void setMovesSinceLastSponge(UUID playerId, int count) { session(playerId).movesSinceLastSponge = count; }
+    public void setUnconsciousTimer(UUID playerId, int timer) { session(playerId).unconsciousTimer = timer; }
+    public void setHasRisingTemp(UUID playerId, boolean risingTemp) { session(playerId).hasRisingTemp = risingTemp; }
+    public void setExtremelyWeakCounter(UUID playerId, int count) { session(playerId).extremelyWeakCounter = count; }
+    public void setRedTempCounter(UUID playerId, int count) { session(playerId).redTempCounter = count; }
+    public void setPatientName(UUID playerId, String name) { session(playerId).patientName = name; }
+    public void removeDefibrillatorCountdown(UUID playerId) { SurgerySession s = get(playerId); if (s != null) { s.defibrillatorCountdown = null; } }
+
     // ==============================================
     // Player Data Cleanup
     // ==============================================
     public void cleanup(UUID playerId) {
-        playerPatientName.remove(playerId);
-        playerClickedSlots.remove(playerId);
-        playerDiagnosis.remove(playerId);
-        playerPulse.remove(playerId);
-        playerStatus.remove(playerId);
-        playerTemperature.remove(playerId);
-        playerOperationSite.remove(playerId);
-        playerIncisions.remove(playerId);
-        playerSkillFail.remove(playerId);
-        playerBleeding.remove(playerId);
-        playerBrokenBones.remove(playerId);
-        playerShatteredBones.remove(playerId);
-        playerRevealedBrokenBones.remove(playerId);
-        playerRevealedShatteredBones.remove(playerId);
-        playerDefibrillatorCountdown.remove(playerId);
-        playerCured.remove(playerId);
-        playerAntibioticsCounter.remove(playerId);
-        playerAntisepticProtection.remove(playerId);
-        playerSpongeEffect.remove(playerId);
-        playerMoveCount.remove(playerId);
-        playerMovesSinceLastSponge.remove(playerId);
-        playerWoundsExamined.remove(playerId);
-        playerUnconsciousTimer.remove(playerId);
-        playerHasRisingTemp.remove(playerId);
-        playerExtremelyWeakCounter.remove(playerId);
-        playerRedTempCounter.remove(playerId);
+        sessions.remove(playerId);
     }
 }

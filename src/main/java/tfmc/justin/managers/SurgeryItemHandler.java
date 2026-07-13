@@ -9,8 +9,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 // ==============================================
 // Handles all surgery item clicks and tool logic
@@ -25,8 +25,7 @@ public class SurgeryItemHandler {
     private final SurgeryCompletionHandler completionHandler;
     private final DiagnosisChecker diagnosisChecker;
     private final SurgeryItemsConfig itemsConfig;
-    private final Random random;
-    
+
     // Skill fail message lists
     private java.util.List<String> skillFailLabKit;
     private java.util.List<String> skillFailUltrasound;
@@ -58,7 +57,6 @@ public class SurgeryItemHandler {
         this.completionHandler = completionHandler;
         this.diagnosisChecker = diagnosisChecker;
         this.itemsConfig = itemsConfig;
-        this.random = new Random();
     }
 
     // ==============================================
@@ -109,9 +107,6 @@ public class SurgeryItemHandler {
         
         // Check if the player has this item in their inventory and remove it
         if (removeItemFromPlayer(player, clickedItem)) {
-            // Track that this slot was clicked
-            stateManager.addClickedSlot(playerId, slot);
-            
             // Process per-move effects before updating menu
             mechanicsManager.processMoveEffects(player, slot);
 
@@ -219,12 +214,12 @@ public class SurgeryItemHandler {
             return getRandomSkillFail(skillFailUltrasound);
         } else {
             menu.setItem(34, null);
-            String diagnosis = diagnosesList.get(random.nextInt(diagnosesList.size()));
+            String diagnosis = diagnosesList.get(ThreadLocalRandom.current().nextInt(diagnosesList.size()));
             stateManager.setDiagnosis(playerId, diagnosis);
             
             // If diagnosis is a flu, set initial high temperature (99-104°F)
             if (diagnosisChecker.isFlu(diagnosis)) {
-                double fluTemp = 99.0 + (random.nextDouble() * 5.0);
+                double fluTemp = 99.0 + (ThreadLocalRandom.current().nextDouble() * 5.0);
                 stateManager.setTemperature(playerId, fluTemp);
                 uiUpdater.updateTemperatureBlock(menu, playerId, fluTemp);
             }
@@ -232,8 +227,8 @@ public class SurgeryItemHandler {
             // Assign bones only for bone-related diagnoses
             if (diagnosisChecker.hasBones(diagnosis)) {
                 // Get bone counts from config, or use random if not specified
-                int brokenBones = plugin.getConfig().getInt("bone-counts." + diagnosis + ".broken", random.nextInt(3));
-                int shatteredBones = plugin.getConfig().getInt("bone-counts." + diagnosis + ".shattered", random.nextInt(2));
+                int brokenBones = plugin.getConfig().getInt("bone-counts." + diagnosis + ".broken", ThreadLocalRandom.current().nextInt(3));
+                int shatteredBones = plugin.getConfig().getInt("bone-counts." + diagnosis + ".shattered", ThreadLocalRandom.current().nextInt(2));
                 stateManager.setBrokenBones(playerId, brokenBones);
                 stateManager.setShatteredBones(playerId, shatteredBones);
             }
@@ -276,7 +271,6 @@ public class SurgeryItemHandler {
             // Paper Cuts: Show examined message after 2 scalpel uses
             String diagnosis = stateManager.getDiagnosis(playerId);
             if (diagnosis != null && diagnosis.equals("Paper Cuts") && incisions == 2) {
-                stateManager.setWoundsExamined(playerId, true);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("wounds-examined"));
             }
             
@@ -286,7 +280,7 @@ public class SurgeryItemHandler {
             }
             
             // 50% chance for pulse to decrease when making incision
-            if (random.nextDouble() < plugin.getConfig().getDouble("pulse.scalpel-decrease-chance", 0.50)) {
+            if (ThreadLocalRandom.current().nextDouble() < plugin.getConfig().getDouble("pulse.scalpel-decrease-chance", 0.50)) {
                 String currentPulse = stateManager.getPulse(playerId);
                 String newPulse = SurgeryConstants.worsenPulse(currentPulse);
                 stateManager.setPulse(playerId, newPulse);
@@ -533,7 +527,7 @@ public class SurgeryItemHandler {
         if (messages == null || messages.isEmpty()) {
             return "Something went wrong!";
         }
-        return messages.get(random.nextInt(messages.size()));
+        return messages.get(ThreadLocalRandom.current().nextInt(messages.size()));
     }
     
     // ==============================================
@@ -550,7 +544,7 @@ public class SurgeryItemHandler {
             baseChance = plugin.getConfig().getDouble("skill-fail.with-sponge-chance", 0.10);
         }
         
-        return random.nextDouble() < baseChance;
+        return ThreadLocalRandom.current().nextDouble() < baseChance;
     }
     
     // ==============================================
