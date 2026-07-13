@@ -177,8 +177,13 @@ public class SurgeryMechanicsManager {
     private void runDiagnosisSpecificMechanics(Player player, Inventory menu, UUID playerId, String diagnosis) {
         switch (diagnosis) {
             case "Moldy Guts":
-                int moldyGutsInterval = plugin.getConfig().getInt("diagnosis-mechanics.moldy-guts.bleeding-interval-min", 3);
-                if (stateManager.getMovesSinceLastSponge(playerId) >= moldyGutsInterval) {
+                // Forces bleeding somewhere between min and max moves since the last
+                // sponge: 50/50 each move once min is reached, guaranteed at max
+                int moldyGutsMin = plugin.getConfig().getInt("diagnosis-mechanics.moldy-guts.bleeding-interval-min", 3);
+                int moldyGutsMax = plugin.getConfig().getInt("diagnosis-mechanics.moldy-guts.bleeding-interval-max", 4);
+                int movesSinceSpongeNow = stateManager.getMovesSinceLastSponge(playerId);
+                if (movesSinceSpongeNow >= moldyGutsMax
+                        || (movesSinceSpongeNow >= moldyGutsMin && ThreadLocalRandom.current().nextBoolean())) {
                     stateManager.setBleeding(playerId, true);
                     uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("moldy-guts"));
                     updateDynamicTools(player, menu, playerId);

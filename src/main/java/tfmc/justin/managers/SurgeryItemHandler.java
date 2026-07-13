@@ -268,9 +268,10 @@ public class SurgeryItemHandler {
                 uiUpdater.updateOperationSiteBlock(menu, playerId, "Unclean");
             }
             
-            // Paper Cuts: Show examined message after 2 scalpel uses
+            // Paper Cuts: Show examined message after configured scalpel uses
             String diagnosis = stateManager.getDiagnosis(playerId);
-            if (diagnosis != null && diagnosis.equals("Paper Cuts") && incisions == 2) {
+            int paperCutsUses = plugin.getConfig().getInt("diagnosis-mechanics.paper-cuts.scalpel-uses-required", 2);
+            if (diagnosis != null && diagnosis.equals("Paper Cuts") && incisions == paperCutsUses) {
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("wounds-examined"));
             }
             
@@ -319,15 +320,16 @@ public class SurgeryItemHandler {
     // Antibiotics functionality: reduces temperature by 5.4°F (3.0°C)
     // ==============================================
     private String handleAntibiotics(Player player, Inventory menu, UUID playerId, boolean skillFail) {
+        double change = plugin.getConfig().getDouble("temperature.antibiotics-change", 5.4);
         if (skillFail) {
-            double temp = stateManager.getTemperature(playerId) + 5.4;
-            temp = Math.min(temp, 110.0);
+            double temp = stateManager.getTemperature(playerId) + change;
+            temp = Math.min(temp, plugin.getConfig().getDouble("temperature.instant-death-threshold", 110.0));
             stateManager.setTemperature(playerId, temp);
             uiUpdater.updateTemperatureBlock(menu, playerId, temp);
             return getRandomSkillFail(skillFailAntibiotics);
         } else {
-            double temp = stateManager.getTemperature(playerId) - 5.4;
-            temp = Math.max(temp, 98.6);
+            double temp = stateManager.getTemperature(playerId) - change;
+            temp = Math.max(temp, plugin.getConfig().getDouble("temperature.normal", 98.6));
             stateManager.setTemperature(playerId, temp);
             uiUpdater.updateTemperatureBlock(menu, playerId, temp);
             uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("temperature-reduced"));
@@ -393,8 +395,9 @@ public class SurgeryItemHandler {
             Integer unconsciousTimer = stateManager.getUnconsciousTimer(playerId);
             String currentStatus = stateManager.getStatus(playerId);
             
-            if ((currentStatus.equals("Unconscious") || currentStatus.equals("Coming to")) && 
-                unconsciousTimer != null && unconsciousTimer < 4) {
+            int reuseCooldown = plugin.getConfig().getInt("death-timers.anesthetic-reuse-cooldown", 4);
+            if ((currentStatus.equals("Unconscious") || currentStatus.equals("Coming to")) &&
+                unconsciousTimer != null && unconsciousTimer < reuseCooldown) {
                 completionHandler.failSurgery(player, uiUpdater.getMessage("failure-anesthetic-misuse"));
                 return "";
             }

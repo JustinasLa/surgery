@@ -36,8 +36,9 @@ public class SurgeryCompletionHandler {
         // 3. Status must be "Unconscious" (LIME)
         if (!stateManager.getStatus(playerId).equals("Unconscious")) { return false; }
         
-        // 4. Temperature must be <= 100°F (LIME)
-        if (stateManager.getTemperature(playerId) > 100.0) { return false; }
+        // 4. Temperature must be at or below the configured success threshold (LIME)
+        double successThreshold = plugin.getConfig().getDouble("temperature.success-threshold", 100.0);
+        if (stateManager.getTemperature(playerId) > successThreshold) { return false; }
         
         // 5. Operation site must be "Clean" (LIME)
         if (!stateManager.getOperationSite(playerId).equals("Clean")) { return false; }
