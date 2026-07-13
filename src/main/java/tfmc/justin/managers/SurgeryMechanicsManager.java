@@ -1,6 +1,7 @@
 package tfmc.justin.managers;
 
 import me.Plugins.TLibs.Objects.API.ItemAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -58,21 +59,44 @@ public class SurgeryMechanicsManager {
         UUID playerId = player.getUniqueId();
         Inventory menu = player.getOpenInventory().getTopInventory();
         String diagnosis = stateManager.getDiagnosis(playerId);
-        
+
+        // Fail if the patient logged off or moved out of surgery range
+        if (!isPatientPresent(player)) {
+            completionHandler.failSurgery(player, uiUpdater.getMessage("failure-patient-left",
+                "&cThe patient is no longer on the operating table!"));
+            return;
+        }
+
         // Increment move counter
         int moveCount = stateManager.getMoveCount(playerId) + 1;
         stateManager.setMoveCount(playerId, moveCount);
-        
+
         // Increment moves since last sponge
         int movesSinceSponge = stateManager.getMovesSinceLastSponge(playerId) + 1;
         stateManager.setMovesSinceLastSponge(playerId, movesSinceSponge);
-        
-        // Increment unconscious timer if patient is unconscious
+
+        // Advance the anesthetic wear-off cycle: Unconscious -> Coming to -> Awake
         String currentStatus = stateManager.getStatus(playerId);
         if (currentStatus.equals("Unconscious") || currentStatus.equals("Coming to")) {
             Integer unconsciousTimer = stateManager.getUnconsciousTimer(playerId);
             if (unconsciousTimer != null) {
-                stateManager.setUnconsciousTimer(playerId, unconsciousTimer + 1);
+                int timer = unconsciousTimer + 1;
+                stateManager.setUnconsciousTimer(playerId, timer);
+
+                int unconsciousMoves = plugin.getConfig().getInt("anesthetic.unconscious-moves", 6);
+                int comingToMoves = plugin.getConfig().getInt("anesthetic.coming-to-moves", 2);
+
+                if (currentStatus.equals("Unconscious") && timer >= unconsciousMoves) {
+                    stateManager.setStatus(playerId, "Coming to");
+                    uiUpdater.updateStatusBlock(menu, playerId, "Coming to");
+                    uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("patient-coming-to",
+                        "&eThe anesthetic is wearing off - the patient is coming to!"));
+                } else if (currentStatus.equals("Coming to") && timer >= unconsciousMoves + comingToMoves) {
+                    stateManager.setStatus(playerId, "Awake");
+                    uiUpdater.updateStatusBlock(menu, playerId, "Awake");
+                    uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("patient-woke-up",
+                        "&cThe patient is fully awake! Re-administer anesthetic before cutting!"));
+                }
             }
         }
         
@@ -171,6 +195,27 @@ public class SurgeryMechanicsManager {
         }
     }
     
+    // ==============================================
+    // Checks the patient is still online, in the same world, and within range
+    // Range gets a configurable multiplier so normal fidgeting doesn't end the surgery
+    // ==============================================
+    private boolean isPatientPresent(Player surgeon) {
+        UUID patientUuid = stateManager.getPatientUuid(surgeon.getUniqueId());
+        if (patientUuid == null) {
+            return true;
+        }
+        Player patient = Bukkit.getPlayer(patientUuid);
+        if (patient == null || !patient.isOnline()) {
+            return false;
+        }
+        if (!patient.getWorld().equals(surgeon.getWorld())) {
+            return false;
+        }
+        double maxDistance = plugin.getConfig().getDouble("max-surgery-distance", 5.0);
+        double multiplier = plugin.getConfig().getDouble("patient-leave-distance-multiplier", 2.0);
+        return surgeon.getLocation().distance(patient.getLocation()) <= maxDistance * multiplier;
+    }
+
     // ==============================================
     // Runs diagnosis-specific mechanics
     // ==============================================

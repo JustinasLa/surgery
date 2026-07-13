@@ -64,6 +64,7 @@ public class SurgeryMenuManager {
     // ==============================================
     public void openSurgeryMenu(Player surgeon, Player patient) {
         stateManager.setPatientName(surgeon.getUniqueId(), patient.getName());
+        stateManager.setPatientUuid(surgeon.getUniqueId(), patient.getUniqueId());
         menuBuilder.buildAndOpenMenu(surgeon);
     }
     

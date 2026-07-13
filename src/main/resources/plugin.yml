@@ -8,4 +8,10 @@ depend: [TLibs]
 commands:
   surgery:
     description: Opens the surgery menu
-    usage: /surgery
+    usage: /surgery <player_name>
+    permission: surgery.use
+
+permissions:
+  surgery.use:
+    description: Allows performing surgery on another player
+    default: true

@@ -4,6 +4,10 @@
 # Maximum distance in blocks between surgeon and patient to perform surgery
 max-surgery-distance: 5.0
 
+# During surgery the patient may drift up to max-surgery-distance times this
+# multiplier before the surgery fails (patient left / logged off also fails)
+patient-leave-distance-multiplier: 2.0
+
 # ============================================
 # DIAGNOSES
 # ============================================
@@ -135,6 +139,14 @@ death-timers:
   weak-pulse-turns: 2                    # Consecutive turns with Extremely Weak pulse
   red-temp-turns: 2                      # Consecutive turns with red temperature
   anesthetic-reuse-cooldown: 4           # Moves before anesthetic can be reused
+
+# ============================================
+# ANESTHETIC WEAR-OFF
+# ============================================
+
+anesthetic:
+  unconscious-moves: 6                   # Moves unconscious before patient starts coming to
+  coming-to-moves: 2                     # Moves of "Coming to" before patient is fully awake
 
 # ============================================
 # BONE MECHANICS

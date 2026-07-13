@@ -26,6 +26,7 @@ failure-anesthetic-misuse: "&cYou put the patient to sleep. Permanently."
 failure-weak-pulse: "&cThe patient's heart has stopped beating."
 failure-no-diagnosis: "&cYou cut into the patient without knowing what was wrong!"
 failure-high-fever: "&cThe patient died from severe hyperthermia!"
+failure-patient-left: "&cThe patient is no longer on the operating table!"
 
 # Progress Messages
 bleeding-warning: "&cIt's becoming hard to see..."
@@ -50,6 +51,8 @@ clamp-available: "&cSurgical Clamp is now available!"
 # Status Change Messages
 pulse-weakening: "&cBlood loss is weakening the patient's pulse!"
 protection-lost: "&cOperation site contaminated! Temperature protection lost."
+patient-coming-to: "&eThe anesthetic is wearing off - the patient is coming to!"
+patient-woke-up: "&cThe patient is fully awake! Re-administer anesthetic before cutting!"
 
 # Diagnosis-Specific Messages
 moldy-guts: "&4The patient's guts burst making it impossible to see anything!"
