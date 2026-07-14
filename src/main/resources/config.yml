@@ -121,6 +121,8 @@ temperature:
   success-threshold: 100.0               # Must be <= this to succeed
   rise-rate: 1.8                         # Temp increase per move
   antibiotics-change: 5.4                # ±F from antibiotics
+  flu-temp-min: 99.0                     # Min initial temp for flu diagnoses
+  flu-temp-max: 104.0                    # Max initial temp for flu diagnoses
 
 # ============================================
 # PULSE SETTINGS

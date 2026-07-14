@@ -36,24 +36,19 @@ public class SurgeryMenuBuilder {
     public void buildAndOpenMenu(Player player) {
         Inventory menu = new SurgeryMenuHolder().getInventory();
         
-        // Map specific items to specific slots
+        // Map specific slots to item config indexes
         int[][] slotMapping = {
-            {28, 0},  // sponge
-            {29, 1},  // scalpel
-            {30, 2},  // stitches
-            {32, 4},  // antiseptic
-            {34, 6},  // ultrasound
-            {37, 7},  // lab_kit
-            {38, 8},  // anesthetic
-            {43, 13}  // transfusion
-            
-            // Antibiotics (31) appears after using the lab kit
+            {SurgeryConstants.SLOT_SPONGE, 0},
+            {SurgeryConstants.SLOT_SCALPEL, 1},
+            {SurgeryConstants.SLOT_STITCHES, 2},
+            {SurgeryConstants.SLOT_ANTISEPTIC, 4},
+            {SurgeryConstants.SLOT_ULTRASOUND, 6},
+            {SurgeryConstants.SLOT_LAB_KIT, 7},
+            {SurgeryConstants.SLOT_ANESTHETIC, 8},
+            {SurgeryConstants.SLOT_TRANSFUSION, 13}
 
-            // Surgical Glove/Fix it (33),
-            // Defibrillator (39),
-            // Pins (40),
-            // Splint (41),
-            // Clamp (42)
+            // Antibiotics appear after using the lab kit
+            // Surgical Glove, Defibrillator, Pins, Splint, and Clamp
             // appear dynamically
         };
         
@@ -73,8 +68,8 @@ public class SurgeryMenuBuilder {
             }
         }
         
-        // Add placeholder info blocks (slots 10-16)
-        for (int i = 10; i <= 16; i++) {
+        // Add placeholder info blocks
+        for (int i = SurgeryConstants.INFO_SLOT_FIRST; i <= SurgeryConstants.INFO_SLOT_LAST; i++) {
             ItemStack infoBlock = uiUpdater.createInfoBlock(Material.RED_CONCRETE, " ", "");
             menu.setItem(i, infoBlock);
         }
@@ -93,7 +88,7 @@ public class SurgeryMenuBuilder {
         // Set the first info block (slot 10) as "diagnosis"
         // ==============================================
         ItemStack diagnosisBlock = uiUpdater.createInfoBlock(Material.RED_CONCRETE, ChatColor.GOLD + "Diagnosis", ChatColor.GRAY + "The patient has not been diagnosed.");
-        menu.setItem(10, diagnosisBlock);
+        menu.setItem(SurgeryConstants.SLOT_DIAGNOSIS, diagnosisBlock);
         
         // ==============================================
         // Set the second info block (slot 11) as "pulse". Always starts at Strong
@@ -102,7 +97,7 @@ public class SurgeryMenuBuilder {
         stateManager.setPulse(playerId, pulseStatus);
         Material pulseColor = SurgeryConstants.getPulseColor(pulseStatus);
         ItemStack pulseBlock = uiUpdater.createInfoBlock(pulseColor, ChatColor.GOLD + "Pulse", ChatColor.GRAY + pulseStatus);
-        menu.setItem(11, pulseBlock);
+        menu.setItem(SurgeryConstants.SLOT_PULSE, pulseBlock);
         
         // ==============================================
         // Set the third info block (slot 12) as "status". Always starts at Awake
@@ -111,7 +106,7 @@ public class SurgeryMenuBuilder {
         stateManager.setStatus(playerId, patientStatus);
         Material statusColor = SurgeryConstants.getStatusColor(patientStatus);
         ItemStack statusBlock = uiUpdater.createInfoBlock(statusColor, ChatColor.GOLD + "Status", ChatColor.GRAY + patientStatus);
-        menu.setItem(12, statusBlock);
+        menu.setItem(SurgeryConstants.SLOT_STATUS, statusBlock);
         
         // ==============================================
         // Randomize if patient has rising temperature (50% chance)
@@ -135,7 +130,7 @@ public class SurgeryMenuBuilder {
         Material tempColor = SurgeryConstants.getTemperatureColor(temperature);
         String tempDisplay = SurgeryConstants.formatTemperature(temperature);
         ItemStack tempBlock = uiUpdater.createInfoBlock(tempColor, ChatColor.GOLD + "Temperature", ChatColor.GRAY + tempDisplay);
-        menu.setItem(13, tempBlock);
+        menu.setItem(SurgeryConstants.SLOT_TEMPERATURE, tempBlock);
         
         // ==============================================
         // Set the fifth info block (slot 14) as "operation site". Always starts at Not sanitized
@@ -144,7 +139,7 @@ public class SurgeryMenuBuilder {
         stateManager.setOperationSite(playerId, opSiteStatus);
         Material opSiteColor = SurgeryConstants.getOperationSiteColor(opSiteStatus);
         ItemStack opSiteBlock = uiUpdater.createInfoBlock(opSiteColor, ChatColor.GOLD + "Operation site", ChatColor.GRAY + opSiteStatus);
-        menu.setItem(14, opSiteBlock);
+        menu.setItem(SurgeryConstants.SLOT_OPERATION_SITE, opSiteBlock);
         
         // ==============================================
         // Set the sixth info block (slot 15) as "incisions". Always starts at 0
@@ -153,14 +148,14 @@ public class SurgeryMenuBuilder {
         stateManager.setIncisions(playerId, incisions);
         Material incisionColor = SurgeryConstants.getIncisionColor(incisions);
         ItemStack incisionBlock = uiUpdater.createInfoBlock(incisionColor, ChatColor.GOLD + "Incisions", ChatColor.GRAY + String.valueOf(incisions));
-        menu.setItem(15, incisionBlock);
+        menu.setItem(SurgeryConstants.SLOT_INCISIONS, incisionBlock);
         
         // ==============================================
         // Set the seventh info block (slot 16) as "skill fail". Starts empty
         // ==============================================
         stateManager.setSkillFail(playerId, "");
         ItemStack skillFailBlock = uiUpdater.createInfoBlock(Material.LIME_CONCRETE, ChatColor.GOLD + "Skill Fail", ChatColor.GRAY + "Nothing to show here");
-        menu.setItem(16, skillFailBlock);
+        menu.setItem(SurgeryConstants.SLOT_SKILL_FAIL, skillFailBlock);
 
         // ==============================================
         // Initialize other state variables

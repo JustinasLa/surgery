@@ -91,13 +91,13 @@ public class SurgeryItemHandler {
         
         UUID playerId = player.getUniqueId();
         
-        // Ignore clicks on info blocks (slots 10-16)
-        if (slot >= 10 && slot <= 16) {
+        // Ignore clicks on info blocks
+        if (slot >= SurgeryConstants.INFO_SLOT_FIRST && slot <= SurgeryConstants.INFO_SLOT_LAST) {
             return;
         }
-        
+
         // Special check for scalpel - cannot be used when patient is awake
-        if (slot == 29) {
+        if (slot == SurgeryConstants.SLOT_SCALPEL) {
             String patientStatus = stateManager.getStatus(playerId);
             if (patientStatus.equals("Awake")) {
                 completionHandler.failSurgery(player, uiUpdater.getMessage("failure-stabbed-awake"));
@@ -151,20 +151,20 @@ public class SurgeryItemHandler {
         // Skill fail checks for each item
         // ==============================================
         switch (clickedSlot) {
-            case 28: skillFailMsg = handleSponge(player, menu, playerId, skillFail); break; // Sponge
-            case 29: skillFailMsg = handleScalpel(player, menu, playerId, skillFail); break; // Scalpel
-            case 30: skillFailMsg = handleStitches(player, menu, playerId, skillFail); break; // Stitches
-            case 31: skillFailMsg = handleAntibiotics(player, menu, playerId, skillFail); break; // Antibiotics
-            case 32: skillFailMsg = handleAntiseptic(player, menu, playerId, skillFail); break; // Antiseptic
-            case 33: skillFailMsg = handleSurgicalGlove(player, menu, playerId, skillFail); break; // Surgical Glove
-            case 34: skillFailMsg = handleUltrasound(player, menu, playerId, skillFail); break; // Ultrasound
-            case 37: skillFailMsg = handleLabKit(player, menu, playerId, skillFail); break; // Lab kit
-            case 38: skillFailMsg = handleAnesthetic(player, menu, playerId, skillFail); break; // Anesthetic
-            case 39: skillFailMsg = handleDefibrillator(player, menu, playerId, skillFail); break; // Defibrillator
-            case 40: skillFailMsg = handlePins(player, menu, playerId, skillFail); break; // Pins
-            case 41: skillFailMsg = handleSplint(player, menu, playerId, skillFail); break; // Splint
-            case 42: skillFailMsg = handleClamp(player, menu, playerId, skillFail); break; // Clamp
-            case 43: skillFailMsg = handleTransfusion(player, menu, playerId, skillFail); break; // Transfusion
+            case SurgeryConstants.SLOT_SPONGE: skillFailMsg = handleSponge(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_SCALPEL: skillFailMsg = handleScalpel(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_STITCHES: skillFailMsg = handleStitches(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_ANTIBIOTICS: skillFailMsg = handleAntibiotics(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_ANTISEPTIC: skillFailMsg = handleAntiseptic(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_SURGICAL_GLOVE: skillFailMsg = handleSurgicalGlove(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_ULTRASOUND: skillFailMsg = handleUltrasound(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_LAB_KIT: skillFailMsg = handleLabKit(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_ANESTHETIC: skillFailMsg = handleAnesthetic(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_DEFIBRILLATOR: skillFailMsg = handleDefibrillator(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_PINS: skillFailMsg = handlePins(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_SPLINT: skillFailMsg = handleSplint(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_CLAMP: skillFailMsg = handleClamp(player, menu, playerId, skillFail); break;
+            case SurgeryConstants.SLOT_TRANSFUSION: skillFailMsg = handleTransfusion(player, menu, playerId, skillFail); break;
         }
         
         // ==============================================
@@ -174,7 +174,7 @@ public class SurgeryItemHandler {
         Material skillFailColor = skillFailMsg.isEmpty() ? Material.LIME_CONCRETE : Material.RED_CONCRETE;
         String skillFailDisplay = skillFailMsg.isEmpty() ? ChatColor.GRAY + "Nothing to show here" : ChatColor.GRAY + skillFailMsg;
         ItemStack skillFailBlock = uiUpdater.createInfoBlock(skillFailColor, ChatColor.GOLD + "Skill Fail", skillFailDisplay);
-        menu.setItem(16, skillFailBlock);
+        menu.setItem(SurgeryConstants.SLOT_SKILL_FAIL, skillFailBlock);
         
         // Clear sponge effect (it only lasts for one move)
         stateManager.setSpongeEffect(playerId, false);
@@ -197,10 +197,10 @@ public class SurgeryItemHandler {
         if (skillFail) {
             return getRandomSkillFail(skillFailLabKit);
         } else {
-            menu.setItem(37, null);
+            menu.setItem(SurgeryConstants.SLOT_LAB_KIT, null);
             ItemStack antibiotics = api.getCreator().getItemFromPath(itemsConfig.getItemPath(3));
             if (antibiotics != null) {
-                menu.setItem(31, antibiotics);
+                menu.setItem(SurgeryConstants.SLOT_ANTIBIOTICS, antibiotics);
             }
             return "";
         }
@@ -213,13 +213,15 @@ public class SurgeryItemHandler {
         if (skillFail) {
             return getRandomSkillFail(skillFailUltrasound);
         } else {
-            menu.setItem(34, null);
+            menu.setItem(SurgeryConstants.SLOT_ULTRASOUND, null);
             String diagnosis = diagnosesList.get(ThreadLocalRandom.current().nextInt(diagnosesList.size()));
             stateManager.setDiagnosis(playerId, diagnosis);
             
-            // If diagnosis is a flu, set initial high temperature (99-104°F)
+            // If diagnosis is a flu, set initial high temperature from config range
             if (diagnosisChecker.isFlu(diagnosis)) {
-                double fluTemp = 99.0 + (ThreadLocalRandom.current().nextDouble() * 5.0);
+                double fluMin = plugin.getConfig().getDouble("temperature.flu-temp-min", 99.0);
+                double fluMax = plugin.getConfig().getDouble("temperature.flu-temp-max", 104.0);
+                double fluTemp = fluMin + (ThreadLocalRandom.current().nextDouble() * (fluMax - fluMin));
                 stateManager.setTemperature(playerId, fluTemp);
                 uiUpdater.updateTemperatureBlock(menu, playerId, fluTemp);
             }
@@ -236,7 +238,7 @@ public class SurgeryItemHandler {
             // Update diagnosis block
             ItemStack diagnosisBlock = uiUpdater.createInfoBlock(Material.YELLOW_CONCRETE, 
                 ChatColor.GOLD + "Diagnosis", ChatColor.GRAY + "The patient suffers from " + diagnosis);
-            menu.setItem(10, diagnosisBlock);
+            menu.setItem(SurgeryConstants.SLOT_DIAGNOSIS, diagnosisBlock);
             
             // Check if surgical glove should appear
             mechanicsManager.checkForFixItButton(player, menu, playerId, 0);
@@ -421,7 +423,7 @@ public class SurgeryItemHandler {
                 stateManager.setStatus(playerId, "Unconscious");
                 uiUpdater.updateStatusBlock(menu, playerId, "Unconscious");
                 stateManager.removeDefibrillatorCountdown(playerId);
-                menu.setItem(39, null);
+                menu.setItem(SurgeryConstants.SLOT_DEFIBRILLATOR, null);
             }
             return "";
         }
@@ -444,7 +446,7 @@ public class SurgeryItemHandler {
                 }
                 uiUpdater.updateDiagnosisBlock(menu, playerId);
                 if (actualBroken - 1 == 0) {
-                    menu.setItem(41, null);
+                    menu.setItem(SurgeryConstants.SLOT_SPLINT, null);
                 }
             }
             return "";
@@ -485,7 +487,7 @@ public class SurgeryItemHandler {
                 mechanicsManager.updateDynamicTools(player, menu, playerId);
                 
                 if (shatteredBones - 1 == 0) {
-                    menu.setItem(40, null);
+                    menu.setItem(SurgeryConstants.SLOT_PINS, null);
                 }
             }
             return "";
@@ -515,7 +517,7 @@ public class SurgeryItemHandler {
             return getRandomSkillFail(skillFailSurgicalGlove);
         } else {
             stateManager.setCured(playerId, true);
-            menu.setItem(33, null);
+            menu.setItem(SurgeryConstants.SLOT_SURGICAL_GLOVE, null);
             uiUpdater.updateDiagnosisBlock(menu, playerId);
             
             // Don't show incomplete message if surgery is already successful

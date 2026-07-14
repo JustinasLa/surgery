@@ -75,7 +75,7 @@ public class SurgeryUIUpdater {
     public void updateIncisionBlock(Inventory menu, UUID playerId, int incisions) {
         Material incisionColor = SurgeryConstants.getIncisionColor(incisions);
         ItemStack incisionBlock = createInfoBlock(incisionColor, ChatColor.GOLD + "Incisions", ChatColor.GRAY + String.valueOf(incisions));
-        menu.setItem(15, incisionBlock);
+        menu.setItem(SurgeryConstants.SLOT_INCISIONS, incisionBlock);
     }
     
     // ==============================================
@@ -85,7 +85,7 @@ public class SurgeryUIUpdater {
         Material tempColor = SurgeryConstants.getTemperatureColor(temp);
         String tempDisplay = SurgeryConstants.formatTemperature(temp);
         ItemStack tempBlock = createInfoBlock(tempColor, ChatColor.GOLD + "Temperature", ChatColor.GRAY + tempDisplay);
-        menu.setItem(13, tempBlock);
+        menu.setItem(SurgeryConstants.SLOT_TEMPERATURE, tempBlock);
     }
     
     // ==============================================
@@ -94,7 +94,7 @@ public class SurgeryUIUpdater {
     public void updateOperationSiteBlock(Inventory menu, UUID playerId, String status) {
         Material siteColor = SurgeryConstants.getOperationSiteColor(status);
         ItemStack siteBlock = createInfoBlock(siteColor, ChatColor.GOLD + "Operation Site", ChatColor.GRAY + status);
-        menu.setItem(14, siteBlock);
+        menu.setItem(SurgeryConstants.SLOT_OPERATION_SITE, siteBlock);
     }
     
     // ==============================================
@@ -103,7 +103,7 @@ public class SurgeryUIUpdater {
     public void updateStatusBlock(Inventory menu, UUID playerId, String status) {
         Material statusColor = SurgeryConstants.getStatusColor(status);
         ItemStack statusBlock = createInfoBlock(statusColor, ChatColor.GOLD + "Status", ChatColor.GRAY + status);
-        menu.setItem(12, statusBlock);
+        menu.setItem(SurgeryConstants.SLOT_STATUS, statusBlock);
     }
     
     // ==============================================
@@ -112,7 +112,7 @@ public class SurgeryUIUpdater {
     public void updatePulseBlock(Inventory menu, UUID playerId, String pulse) {
         Material pulseColor = SurgeryConstants.getPulseColor(pulse);
         ItemStack pulseBlock = createInfoBlock(pulseColor, ChatColor.GOLD + "Pulse", ChatColor.GRAY + pulse);
-        menu.setItem(11, pulseBlock);
+        menu.setItem(SurgeryConstants.SLOT_PULSE, pulseBlock);
     }
     
     // ==============================================
@@ -143,7 +143,7 @@ public class SurgeryUIUpdater {
             diagnosisBlock = createInfoBlock(diagnosisColor, ChatColor.GOLD + "Diagnosis", diagnosisText);
         }
         
-        menu.setItem(10, diagnosisBlock);
+        menu.setItem(SurgeryConstants.SLOT_DIAGNOSIS, diagnosisBlock);
     }
     
     // ==============================================

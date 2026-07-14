@@ -104,7 +104,7 @@ public class SurgeryMechanicsManager {
         // Skip the decrement when the defibrillator itself was clicked, otherwise
         // the countdown expires before the shock is applied and the full window
         // promised by the config is never usable
-        if (currentStatus.equals("Heart Stopped") && clickedSlot != 39) {
+        if (currentStatus.equals("Heart Stopped") && clickedSlot != SurgeryConstants.SLOT_DEFIBRILLATOR) {
             Integer countdown = stateManager.getDefibrillatorCountdown(playerId);
             if (countdown != null) {
                 countdown--;
@@ -343,7 +343,7 @@ public class SurgeryMechanicsManager {
             if (Math.abs(currentTemp - normalTemp) < 0.1) {
                 ItemStack surgicalGlove = api.getCreator().getItemFromPath(itemsConfig.getItemPath(5));
                 if (surgicalGlove != null) {
-                    menu.setItem(33, surgicalGlove);
+                    menu.setItem(SurgeryConstants.SLOT_SURGICAL_GLOVE, surgicalGlove);
                     uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("surgical-glove-ready"));
                 }
             }
@@ -365,7 +365,7 @@ public class SurgeryMechanicsManager {
                 
                 ItemStack surgicalGlove = api.getCreator().getItemFromPath(itemsConfig.getItemPath(5));
                 if (surgicalGlove != null) {
-                    menu.setItem(33, surgicalGlove);
+                    menu.setItem(SurgeryConstants.SLOT_SURGICAL_GLOVE, surgicalGlove);
                     uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("surgical-glove-ready"));
                 }
             }
@@ -422,51 +422,51 @@ public class SurgeryMechanicsManager {
     public void updateDynamicTools(Player player, Inventory menu, UUID playerId) {
         // Defibrillator: appears when heart stopped
         String status = stateManager.getStatus(playerId);
-        if (status.equals("Heart Stopped") && menu.getItem(39) == null) {
+        if (status.equals("Heart Stopped") && menu.getItem(SurgeryConstants.SLOT_DEFIBRILLATOR) == null) {
             ItemStack defibrillator = api.getCreator().getItemFromPath(itemsConfig.getItemPath(9));
             if (defibrillator != null) {
-                menu.setItem(39, defibrillator);
+                menu.setItem(SurgeryConstants.SLOT_DEFIBRILLATOR, defibrillator);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("defibrillator-available"));
             }
-        } else if (!status.equals("Heart Stopped") && menu.getItem(39) != null) {
-            menu.setItem(39, null);
+        } else if (!status.equals("Heart Stopped") && menu.getItem(SurgeryConstants.SLOT_DEFIBRILLATOR) != null) {
+            menu.setItem(SurgeryConstants.SLOT_DEFIBRILLATOR, null);
         }
-        
+
         // Pins: appears when shattered bones revealed
         int revealedShattered = stateManager.getRevealedShatteredBones(playerId);
-        if (revealedShattered > 0 && menu.getItem(40) == null) {
+        if (revealedShattered > 0 && menu.getItem(SurgeryConstants.SLOT_PINS) == null) {
             ItemStack pins = api.getCreator().getItemFromPath(itemsConfig.getItemPath(10));
             if (pins != null) {
-                menu.setItem(40, pins);
+                menu.setItem(SurgeryConstants.SLOT_PINS, pins);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("pins-available"));
             }
-        } else if (revealedShattered == 0 && menu.getItem(40) != null) {
-            menu.setItem(40, null);
+        } else if (revealedShattered == 0 && menu.getItem(SurgeryConstants.SLOT_PINS) != null) {
+            menu.setItem(SurgeryConstants.SLOT_PINS, null);
         }
-        
+
         // Splint: appears when broken bones revealed
         int revealedBroken = stateManager.getRevealedBrokenBones(playerId);
-        if (revealedBroken > 0 && menu.getItem(41) == null) {
+        if (revealedBroken > 0 && menu.getItem(SurgeryConstants.SLOT_SPLINT) == null) {
             ItemStack splint = api.getCreator().getItemFromPath(itemsConfig.getItemPath(11));
             if (splint != null) {
-                menu.setItem(41, splint);
+                menu.setItem(SurgeryConstants.SLOT_SPLINT, splint);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("splint-available"));
             }
-        } else if (revealedBroken == 0 && menu.getItem(41) != null) {
-            menu.setItem(41, null);
+        } else if (revealedBroken == 0 && menu.getItem(SurgeryConstants.SLOT_SPLINT) != null) {
+            menu.setItem(SurgeryConstants.SLOT_SPLINT, null);
         }
-        
+
         // Clamp: appears when incisions > 1 AND bleeding
         int incisions = stateManager.getIncisions(playerId);
         boolean bleeding = stateManager.isBleeding(playerId);
-        if (incisions > 1 && bleeding && menu.getItem(42) == null) {
+        if (incisions > 1 && bleeding && menu.getItem(SurgeryConstants.SLOT_CLAMP) == null) {
             ItemStack clamp = api.getCreator().getItemFromPath(itemsConfig.getItemPath(12));
             if (clamp != null) {
-                menu.setItem(42, clamp);
+                menu.setItem(SurgeryConstants.SLOT_CLAMP, clamp);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("clamp-available"));
             }
-        } else if ((incisions <= 1 || !bleeding) && menu.getItem(42) != null) {
-            menu.setItem(42, null);
+        } else if ((incisions <= 1 || !bleeding) && menu.getItem(SurgeryConstants.SLOT_CLAMP) != null) {
+            menu.setItem(SurgeryConstants.SLOT_CLAMP, null);
         }
     }
 }
