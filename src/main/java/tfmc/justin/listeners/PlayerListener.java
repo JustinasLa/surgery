@@ -20,8 +20,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        // Remove any leftover surgery state so quitting mid-surgery doesn't leak
-        menuManager.cleanup(event.getPlayer());
+        // Fail an in-progress surgery (quitting is not a free escape from the
+        // failure command) and remove leftover state so nothing leaks
+        menuManager.handleSurgeonQuit(event.getPlayer());
     }
 
     @EventHandler

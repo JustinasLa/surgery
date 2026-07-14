@@ -92,10 +92,11 @@ public class SurgeryMenuManager {
     }
     
     // ==============================================
-    // Cleanup -> removes all player data
+    // Handles the surgeon quitting the server
+    // Called from PlayerListener; fails an in-progress surgery and cleans up
     // ==============================================
-    public void cleanup(Player player) {
-        stateManager.cleanup(player.getUniqueId());
+    public void handleSurgeonQuit(Player player) {
+        completionHandler.handleQuit(player);
     }
     
     // ==============================================

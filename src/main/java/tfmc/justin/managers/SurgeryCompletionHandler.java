@@ -115,6 +115,21 @@ public class SurgeryCompletionHandler {
     }
     
     // ==============================================
+    // Handles the surgeon disconnecting mid-surgery
+    // Runs the failure command (no free escape by logging out) but skips the
+    // messages, sounds, and menu close, which are pointless for a quitting
+    // player. If the close event already failed the surgery, the session is
+    // gone and this only cleans up.
+    // ==============================================
+    public void handleQuit(Player player) {
+        UUID playerId = player.getUniqueId();
+        if (stateManager.hasDiagnosis(playerId)) {
+            executeCompletionCommand(player, false);
+        }
+        stateManager.cleanup(playerId);
+    }
+
+    // ==============================================
     // Executes the configured command for surgery completion (success or failure)
     // ==============================================
     private void executeCompletionCommand(Player surgeon, boolean success) {
