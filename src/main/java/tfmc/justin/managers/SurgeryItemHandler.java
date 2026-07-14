@@ -111,8 +111,8 @@ public class SurgeryItemHandler {
             mechanicsManager.processMoveEffects(player, slot);
 
             // Move effects may have ended the surgery (death timers, fever, bleed-out);
-            // state is cleaned up and the menu is closed, so stop here
-            if (!stateManager.hasPulse(playerId)) {
+            // the session is cleaned up and the menu is closed, so stop here
+            if (!stateManager.hasSession(playerId)) {
                 return;
             }
 

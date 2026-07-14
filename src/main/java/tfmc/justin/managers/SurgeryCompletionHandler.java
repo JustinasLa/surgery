@@ -78,7 +78,7 @@ public class SurgeryCompletionHandler {
         UUID playerId = player.getUniqueId();
         
         // Check if player is actually in surgery (prevent duplicate messages)
-        if (!stateManager.hasPulse(playerId)) { return; }
+        if (!stateManager.hasSession(playerId)) { return; }
         
         executeCompletionCommand(player, false);
         

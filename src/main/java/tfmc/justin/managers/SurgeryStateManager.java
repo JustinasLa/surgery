@@ -80,7 +80,6 @@ public class SurgeryStateManager {
     public UUID getPatientUuid(UUID playerId) { SurgerySession s = get(playerId); return s == null ? null : s.patientUuid; }
     public boolean hasSession(UUID playerId) { return sessions.containsKey(playerId); }
     public boolean hasDiagnosis(UUID playerId) { SurgerySession s = get(playerId); return s != null && s.diagnosis != null; }
-    public boolean hasPulse(UUID playerId) { SurgerySession s = get(playerId); return s != null && s.pulse != null; }
 
     // ==============================================
     // Setters
