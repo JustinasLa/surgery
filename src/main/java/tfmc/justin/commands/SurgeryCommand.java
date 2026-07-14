@@ -30,6 +30,14 @@ public class SurgeryCommand implements CommandExecutor {
 
         Player surgeon = (Player) sender;
 
+        // Block re-entry: opening a second menu fires the old menu's close event,
+        // which fails the surgery and wipes the freshly initialized session
+        if (menuManager.getStateManager().hasSession(surgeon.getUniqueId())) {
+            surgeon.sendMessage(uiUpdater.getMessage("command-already-in-surgery",
+                "&cYou are already performing surgery! Close the current menu first."));
+            return true;
+        }
+
         // Check if player name is provided in command
         if (args.length == 0) {
             surgeon.sendMessage(uiUpdater.getMessage("command-usage", "&cUsage: /surgery <player_name>"));
@@ -50,8 +58,10 @@ public class SurgeryCommand implements CommandExecutor {
         }
 
         // Check if patient is within config distance
+        // World check first: distance() throws across worlds
         double maxDistance = plugin.getConfig().getDouble("max-surgery-distance", 5.0);
-        if (surgeon.getLocation().distance(patient.getLocation()) > maxDistance) {
+        if (!surgeon.getWorld().equals(patient.getWorld())
+                || surgeon.getLocation().distance(patient.getLocation()) > maxDistance) {
             surgeon.sendMessage(uiUpdater.getMessage("command-too-far", "&cThe patient must be within 5 blocks of you!"));
             return true;
         }

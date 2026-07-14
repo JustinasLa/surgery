@@ -116,10 +116,12 @@ public class SurgeryMechanicsManager {
             }
         }
         
-        // Check if temperature exceeds instant death threshold
+        // Check if temperature reached instant death threshold
+        // >= because every temperature increase clamps to the threshold, so a
+        // strict > could never fire and the mechanic was dead
         double currentTemp = stateManager.getTemperature(playerId);
         double instantDeathTemp = plugin.getConfig().getDouble("temperature.instant-death-threshold", 110.0);
-        if (currentTemp > instantDeathTemp) {
+        if (currentTemp >= instantDeathTemp) {
             completionHandler.failSurgery(player, uiUpdater.getMessage("failure-infection"));
             return;
         }

@@ -78,6 +78,7 @@ public class SurgeryStateManager {
     public int getRedTempCounter(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.redTempCounter == null ? 0 : s.redTempCounter; }
     public String getPatientName(UUID playerId) { SurgerySession s = get(playerId); return s == null || s.patientName == null ? "Unknown" : s.patientName; }
     public UUID getPatientUuid(UUID playerId) { SurgerySession s = get(playerId); return s == null ? null : s.patientUuid; }
+    public boolean hasSession(UUID playerId) { return sessions.containsKey(playerId); }
     public boolean hasDiagnosis(UUID playerId) { SurgerySession s = get(playerId); return s != null && s.diagnosis != null; }
     public boolean hasPulse(UUID playerId) { SurgerySession s = get(playerId); return s != null && s.pulse != null; }
 
