@@ -77,7 +77,11 @@ public class SurgeryCommand implements CommandExecutor {
         double maxDistance = plugin.getConfig().getDouble("max-surgery-distance", 5.0);
         if (!surgeon.getWorld().equals(patient.getWorld())
                 || surgeon.getLocation().distance(patient.getLocation()) > maxDistance) {
-            surgeon.sendMessage(uiUpdater.getMessage("command-too-far", "&cThe patient must be within 5 blocks of you!"));
+            // Trim "5.0" to "5" but keep fractional configs like "7.5"
+            String distance = maxDistance == Math.floor(maxDistance)
+                ? String.valueOf((long) maxDistance) : String.valueOf(maxDistance);
+            surgeon.sendMessage(uiUpdater.getMessage("command-too-far", "&cThe patient must be within %distance% blocks of you!")
+                .replace("%distance%", distance));
             return true;
         }
 
