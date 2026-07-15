@@ -23,6 +23,10 @@ public class PlayerListener implements Listener {
         // Fail an in-progress surgery (quitting is not a free escape from the
         // failure command) and remove leftover state so nothing leaks
         menuManager.handleSurgeonQuit(event.getPlayer());
+
+        // The quitting player may also be someone's patient; fail that surgeon's
+        // surgery now instead of on their next move
+        menuManager.handlePatientQuit(event.getPlayer());
     }
 
     @EventHandler

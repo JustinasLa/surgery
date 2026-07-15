@@ -88,6 +88,15 @@ public class SurgeryStateManager {
         return sessions.values().stream().anyMatch(s -> patientUuid.equals(s.patientUuid));
     }
 
+    public UUID findSurgeonForPatient(UUID patientUuid) {
+        for (Map.Entry<UUID, SurgerySession> entry : sessions.entrySet()) {
+            if (patientUuid.equals(entry.getValue().patientUuid)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
     // ==============================================
     // Setters
     // ==============================================

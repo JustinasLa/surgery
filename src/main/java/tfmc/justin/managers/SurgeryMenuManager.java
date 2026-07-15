@@ -98,6 +98,25 @@ public class SurgeryMenuManager {
     public void handleSurgeonQuit(Player player) {
         completionHandler.handleQuit(player);
     }
+
+    // ==============================================
+    // Handles the patient quitting the server
+    // Fails the surgeon's surgery immediately instead of waiting for
+    // their next move to notice the patient is gone
+    // ==============================================
+    public void handlePatientQuit(Player patient) {
+        java.util.UUID surgeonId = stateManager.findSurgeonForPatient(patient.getUniqueId());
+        if (surgeonId == null) {
+            return;
+        }
+        Player surgeon = plugin.getServer().getPlayer(surgeonId);
+        if (surgeon != null && surgeon.isOnline()) {
+            completionHandler.failSurgery(surgeon, uiUpdater.getMessage("failure-patient-left",
+                "&cThe patient is no longer on the operating table!"));
+        } else {
+            stateManager.cleanup(surgeonId);
+        }
+    }
     
     // ==============================================
     // Getters for accessing individual managers
