@@ -240,24 +240,14 @@ public class SurgeryMechanicsManager {
             case "Fatty Liver":
                 double fattyLiverChance = plugin.getConfig().getDouble("diagnosis-mechanics.fatty-liver.heart-stop-chance", 0.20);
                 if (stateManager.getStatus(playerId).equals("Unconscious") && ThreadLocalRandom.current().nextDouble() < fattyLiverChance) {
-                    stateManager.setStatus(playerId, "Heart Stopped");
-                    uiUpdater.updateStatusBlock(menu, playerId, "Heart Stopped");
-                    uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("fatty-liver-heart-stop"));
-                    int defibCountdown = plugin.getConfig().getInt("death-timers.defibrillator-countdown", 2);
-                    stateManager.setDefibrillatorCountdown(playerId, defibCountdown);
-                    updateDynamicTools(player, menu, playerId);
+                    stopHeart(player, menu, playerId, "fatty-liver-heart-stop");
                 }
                 break;
-                
+
             case "Broken Heart":
                 double brokenHeartChance = plugin.getConfig().getDouble("diagnosis-mechanics.broken-heart.heart-stop-chance", 0.35);
                 if (stateManager.getStatus(playerId).equals("Unconscious") && ThreadLocalRandom.current().nextDouble() < brokenHeartChance) {
-                    stateManager.setStatus(playerId, "Heart Stopped");
-                    uiUpdater.updateStatusBlock(menu, playerId, "Heart Stopped");
-                    uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("broken-heart-stop"));
-                    int defibCountdown = plugin.getConfig().getInt("death-timers.defibrillator-countdown", 2);
-                    stateManager.setDefibrillatorCountdown(playerId, defibCountdown);
-                    updateDynamicTools(player, menu, playerId);
+                    stopHeart(player, menu, playerId, "broken-heart-stop");
                 }
                 break;
                 
@@ -282,6 +272,18 @@ public class SurgeryMechanicsManager {
         }
     }
     
+    // ==============================================
+    // Stops the patient's heart: status, UI, message, death timer, tools
+    // ==============================================
+    private void stopHeart(Player player, Inventory menu, UUID playerId, String messageKey) {
+        stateManager.setStatus(playerId, "Heart Stopped");
+        uiUpdater.updateStatusBlock(menu, playerId, "Heart Stopped");
+        uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage(messageKey));
+        int defibCountdown = plugin.getConfig().getInt("death-timers.defibrillator-countdown", 2);
+        stateManager.setDefibrillatorCountdown(playerId, defibCountdown);
+        updateDynamicTools(player, menu, playerId);
+    }
+
     // ==============================================
     // Handles Arcane Infection chaos effects
     // ==============================================
@@ -309,12 +311,7 @@ public class SurgeryMechanicsManager {
                 break;
                 
             case 2: // Heart stop
-                stateManager.setStatus(playerId, "Heart Stopped");
-                uiUpdater.updateStatusBlock(menu, playerId, "Heart Stopped");
-                uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("chaos-heart-stop"));
-                int defibCountdown = plugin.getConfig().getInt("death-timers.defibrillator-countdown", 2);
-                stateManager.setDefibrillatorCountdown(playerId, defibCountdown);
-                updateDynamicTools(player, menu, playerId);
+                stopHeart(player, menu, playerId, "chaos-heart-stop");
                 break;
                 
             case 3: // Random status change
