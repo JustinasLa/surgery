@@ -322,6 +322,13 @@ public class SurgeryMechanicsManager {
                 stateManager.setStatus(playerId, newStatus);
                 uiUpdater.updateStatusBlock(menu, playerId, newStatus);
                 uiUpdater.sendNumberedMessage(player, uiUpdater.getMessage("chaos-status-change"));
+                // A random "Heart Stopped" needs the death timer like every other
+                // heart-stop path; without it the countdown stays null and the
+                // patient can never die from the stopped heart
+                if (newStatus.equals("Heart Stopped")) {
+                    int countdown = plugin.getConfig().getInt("death-timers.defibrillator-countdown", 2);
+                    stateManager.setDefibrillatorCountdown(playerId, countdown);
+                }
                 updateDynamicTools(player, menu, playerId);
                 break;
         }
