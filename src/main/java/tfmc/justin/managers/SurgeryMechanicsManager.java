@@ -328,6 +328,17 @@ public class SurgeryMechanicsManager {
                 if (newStatus.equals("Heart Stopped")) {
                     int countdown = plugin.getConfig().getInt("death-timers.defibrillator-countdown", 2);
                     stateManager.setDefibrillatorCountdown(playerId, countdown);
+                } else {
+                    // Leaving "Heart Stopped" by chaos skips the defibrillator, so the
+                    // old countdown must not survive into a later heart stop
+                    stateManager.removeDefibrillatorCountdown(playerId);
+                }
+                // Align the anesthetic wear-off timer with the forced status, otherwise
+                // a stale timer makes the patient wake instantly or far too late
+                if (newStatus.equals("Unconscious")) {
+                    stateManager.setUnconsciousTimer(playerId, 0);
+                } else if (newStatus.equals("Coming to")) {
+                    stateManager.setUnconsciousTimer(playerId, plugin.getConfig().getInt("anesthetic.unconscious-moves", 6));
                 }
                 updateDynamicTools(player, menu, playerId);
                 break;
