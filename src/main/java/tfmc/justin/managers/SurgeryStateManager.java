@@ -82,6 +82,13 @@ public class SurgeryStateManager {
     public boolean hasDiagnosis(UUID playerId) { SurgerySession s = get(playerId); return s != null && s.diagnosis != null; }
 
     // ==============================================
+    // Patient-side lookups (sessions are keyed by surgeon)
+    // ==============================================
+    public boolean isPatientInSurgery(UUID patientUuid) {
+        return sessions.values().stream().anyMatch(s -> patientUuid.equals(s.patientUuid));
+    }
+
+    // ==============================================
     // Setters
     // ==============================================
     public void setDiagnosis(UUID playerId, String diagnosis) { session(playerId).diagnosis = diagnosis; }

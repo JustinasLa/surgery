@@ -8,6 +8,8 @@ command-too-far: "&cThe patient must be within 5 blocks of you!"
 command-console: "&cThis command can only be used by players."
 command-self-surgery: "&cYou cannot perform surgery on yourself!"
 command-already-in-surgery: "&cYou are already performing surgery! Close the current menu first."
+command-patient-in-surgery: "&cThat player is already undergoing surgery!"
+command-patient-is-operating: "&cThat player is busy performing surgery themselves!"
 
 # Item Errors
 item-not-in-inventory: "&cYou don't have this item in your inventory!"

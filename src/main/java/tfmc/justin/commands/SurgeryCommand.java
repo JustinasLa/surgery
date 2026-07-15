@@ -57,6 +57,21 @@ public class SurgeryCommand implements CommandExecutor {
             return true;
         }
 
+        // One surgery per patient: a second surgeon opening a menu on the same
+        // patient would run two independent surgeries on one body
+        if (menuManager.getStateManager().isPatientInSurgery(patient.getUniqueId())) {
+            surgeon.sendMessage(uiUpdater.getMessage("command-patient-in-surgery",
+                "&cThat player is already undergoing surgery!"));
+            return true;
+        }
+
+        // A player mid-operation as a surgeon cannot also be a patient
+        if (menuManager.getStateManager().hasSession(patient.getUniqueId())) {
+            surgeon.sendMessage(uiUpdater.getMessage("command-patient-is-operating",
+                "&cThat player is busy performing surgery themselves!"));
+            return true;
+        }
+
         // Check if patient is within config distance
         // World check first: distance() throws across worlds
         double maxDistance = plugin.getConfig().getDouble("max-surgery-distance", 5.0);
